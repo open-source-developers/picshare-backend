@@ -9,7 +9,6 @@ const YAML = require('yamljs');
 
 const swaggerUi = require('swagger-ui-express');
 const swaggerDocument = YAML.load('./routes/swagger.yaml');
-const auth = require('./routes/auth');
 
 // Connected to database
 mongoose.connect(
@@ -47,7 +46,10 @@ require('./config/passport')(passport);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 // Routes
+const auth = require('./routes/auth');
+const users = require('./routes/user');
 app.use('/api/auth', auth);
+app.use('/api/users', users);
 
 // Index Route
 app.get('/error', (req, res) => {

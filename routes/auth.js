@@ -13,17 +13,16 @@ router.post('/register', (req, res, next) => {
     username: req.body.username,
     password: req.body.password
   });
-
   User.getUserByUsername(newUser.username, (err, user) => {
     if (user) {
-      res.json({ success: false, msg: 'User already exists with username ' + newUser.username });
+      return res.status(409).json({ success: false, msg: 'User already exists with username ' + newUser.username });
     }
 
     User.addUser(newUser, (err, user) => {
       if (err) {
-        res.json({ success: false, msg: 'Failed to register user' });
+        return res.json({ success: false, msg: 'Failed to register user' });
       } else {
-        res.json({ success: true, msg: 'User registered' });
+        return res.json({ success: true, msg: 'User registered' });
       }
     });
   });
@@ -67,6 +66,11 @@ router.post('/login', (req, res, next) => {
       }
     }); // end comparePassword
   }); // end getUserByUsername
+});
+
+router.get('/test', (req, res, next) => {
+  console.log(Object.keys(req));
+  res.json({ success: 'ok' });
 });
 
 // Profile
