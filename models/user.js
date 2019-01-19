@@ -53,8 +53,12 @@ module.exports.getUserById = (id, callback) => {
   User.findById(id, callback);
 };
 
-module.exports.getFollowers = (id, callback) => {
-  User.findById(id, 'followers', callback);
+module.exports.getFollowers = (id, limit = 20, offset = 0, callback) => {
+  User.findById(id, 'followers', { skip: offset, limit }, callback);
+};
+
+module.exports.getFollowing = (id, limit = 20, offset = 0, callback) => {
+  User.findById(id, 'following', { skip: offset, limit }, callback);
 };
 
 module.exports.getUserByUsername = (username, callback) => {
