@@ -71,4 +71,19 @@ router.get('/:id/pictures', (req, res, next) => {
     return res.status(200).send(obj);
   });
 });
+
+// Return list of posts for this user
+router.get('/:id/posts', (req, res, next) => {
+  const id = req.params.id;
+  const limit = req.query.limit ? Number.parseInt(req.query.limit) : 20;
+  const offset = req.query.offset ? Number.parseInt(req.query.offset) : 0;
+
+  User.getPosts(id, limit, offset, (err, data) => {
+    if (err) return res.status(404).send({ success: false, msg: 'Failed to find user with id: ' + id });
+    let obj = JSON.parse(JSON.stringify(data));
+    obj.count = data.posts.length;
+    return res.status(200).send(obj);
+  });
+});
+
 module.exports = router;
