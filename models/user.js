@@ -61,6 +61,9 @@ module.exports.getFollowing = (id, limit = 20, offset = 0, callback) => {
   User.findById(id, 'following', { skip: offset, limit }, callback);
 };
 
+module.exports.getPictures = (id, limit = 20, offset = 0, callback) => {
+  User.findById(id, 'pictures', { skip: offset, limit }, callback);
+};
 module.exports.getUserByUsername = (username, callback) => {
   const query = {
     username: username
