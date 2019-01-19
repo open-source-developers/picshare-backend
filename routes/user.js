@@ -20,12 +20,21 @@ router.get('', (req, res, next) => {
 router.get('/:id', (req, res, next) => {
   const id = req.params.id;
   User.getUserById(id, (err, data) => {
-    if (err) {
-      return res.status(404).send({ success: false, msg: 'Failed to find user with id: ' + id });
-    } else {
-      const obj = _.omit(JSON.parse(JSON.stringify(data)), ['password', '__v']);
-      return res.status(200).send({ success: true, user: data });
-    }
+    if (err) return res.status(404).send({ success: false, msg: 'Failed to find user with id: ' + id });
+
+    const obj = _.omit(JSON.parse(JSON.stringify(data)), ['password', '__v']);
+    return res.status(200).send({ success: true, user: data });
+  });
+});
+
+router.get('/:id/followers', (req, res, next) => {
+  const id = req.params.id;
+  User.getFollowers(id, (err, data) => {
+    if (err) return res.status(404).send({ success: false, msg: 'Failed to find user with id: ' + id });
+    console.log({ ...data });
+    const obj = JSON.parse(JSON.stringify(data));
+    obj.count = data.followers.length;
+    return res.status(200).send(obj);
   });
 });
 

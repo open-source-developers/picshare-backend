@@ -53,6 +53,10 @@ module.exports.getUserById = (id, callback) => {
   User.findById(id, callback);
 };
 
+module.exports.getFollowers = (id, callback) => {
+  User.findById(id, 'followers', callback);
+};
+
 module.exports.getUserByUsername = (username, callback) => {
   const query = {
     username: username
