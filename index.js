@@ -48,8 +48,10 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 // Routes
 const auth = require('./routes/auth');
 const users = require('./routes/user');
+const userMe = require('./routes/userMe');
 app.use('/api/auth', auth);
 app.use('/api/users', users);
+app.use('/api/user/me', userMe);
 
 // Index Route
 app.get('/error', (req, res) => {

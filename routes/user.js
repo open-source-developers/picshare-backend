@@ -93,10 +93,12 @@ router.get('/:id/likes', (req, res, next) => {
   const offset = req.query.offset ? Number.parseInt(req.query.offset) : 0;
 
   User.getLikes(id, limit, offset, (err, data) => {
-    if (err) return res.status(404).send({ success: false, msg: 'Failed to find user with id: ' + id });
-    let obj = JSON.parse(JSON.stringify(data));
-    obj.count = data.likes.length;
-    return res.status(200).send(obj);
+    console.log(data);
+    res.end();
+    // if (err) return res.status(404).send({ success: false, msg: 'Failed to find user with id: ' + id });
+    // let obj = JSON.parse(JSON.stringify(data));
+    // obj.count = data.likes.length;
+    // return res.status(200).send(obj);
   });
 });
 
