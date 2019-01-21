@@ -73,6 +73,10 @@ module.exports.getLikes = (id, limit = 20, offset = 0, callback) => {
   User.findById(id, 'likes', { skip: offset, limit }, callback);
 };
 
+module.exports.getDislikes = (id, limit = 20, offset = 0, callback) => {
+  User.findById(id, 'dislikes', { skip: offset, limit }, callback);
+};
+
 module.exports.getUserByUsername = (username, callback) => {
   const query = {
     username: username
