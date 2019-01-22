@@ -128,4 +128,18 @@ router.get('/dislikes', passport.authenticate('jwt', { session: false }), (req, 
     return res.status(200).send(obj);
   });
 });
+
+// Get all pictures for loggedin user
+router.get('/pictures', passport.authenticate('jwt', { session: false }), (req, res) => {
+  const userId = req.user._id;
+  const limit = req.query.limit ? Number.parseInt(req.query.limit) : 20;
+  const offset = req.query.offset ? Number.parseInt(req.query.offset) : 0;
+
+  User.getPictures(userId, limit, offset, (err, data) => {
+    if (err) return res.status(404).send({ success: false, msg: 'Failed to find user with id: ' + id });
+    let obj = JSON.parse(JSON.stringify(data));
+    obj.count = data.pictures.length;
+    return res.status(200).send(obj);
+  });
+});
 module.exports = router;
