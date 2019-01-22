@@ -42,7 +42,8 @@ const UserSchema = mongoose.Schema({
   followers: [ObjectId],
   following: [ObjectId],
   pictures: [String],
-  posts: [PostSchema]
+  posts: [PostSchema],
+  likedPosts: [{ _id: false, userId: ObjectId, postId: ObjectId }]
 });
 
 const User = mongoose.model('User', UserSchema);
@@ -75,6 +76,28 @@ module.exports.getLikes = (id, limit = 20, offset = 0, callback) => {
 
 module.exports.getDislikes = (id, limit = 20, offset = 0, callback) => {
   User.findById(id, 'posts.dislikes', { skip: offset, limit }, callback);
+};
+
+module.exports.likePost = (loggedInUserId, targetUserId, postId, callback) => {
+  User.find({ _id: targetUserId, posts: { $elemMatch: { _id: postId } } }, (err, data) => {
+    if (err) {
+      callback(err, data);
+    }
+    User.findOneAndUpdate(
+      { _id: loggedInUserId },
+      {
+        $addToSet: {
+          likedPosts: { userId: targetUserId, postId }
+        }
+      },
+      { new: true },
+      callback
+    );
+  });
+};
+
+module.exports.deleteLikePost = (loggedInUserId, targetUserId, postId, callback) => {
+  User.findOneAndUpdate({ _id: loggedInUserId }, { $pull: { likedPosts: { userId: targetUserId, postId } } }, callback);
 };
 
 module.exports.getUserByUsername = (username, callback) => {
@@ -110,6 +133,10 @@ module.exports.addPost = (post, userId, callback) => {
     { new: true },
     callback
   );
+};
+
+module.exports.deletePost = (userId, postId, callback) => {
+  User.findOneAndUpdate({ _id: userId }, { $pull: { posts: { _id: postId } } }, callback);
 };
 
 module.exports.comparePassword = (candidatePassword, hash, callback) => {

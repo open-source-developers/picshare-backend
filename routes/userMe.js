@@ -32,9 +32,46 @@ router.get('/posts', passport.authenticate('jwt', { session: false }), (req, res
 
   User.getPosts(userId, limit, offset, (err, data) => {
     if (err) return res.status(400).json({ success: false, msg: 'There was some error : ' + err });
-    console.log(data);
     const obj = data.posts;
     res.json({ success: true, data: obj });
   });
 });
+
+// Logged in user will delete post with postId
+router.delete('/posts/:postId', passport.authenticate('jwt', { session: false }), (req, res) => {
+  const userId = req.user._id;
+  const postId = req.params.postId;
+  User.deletePost(userId, postId, (err, data) => {
+    if (err) return res.status(400).json({ success: false, msg: 'There was some error : ' + err });
+    res.end();
+  });
+});
+
+// This user will now like post with postId
+router.put('/like/posts', passport.authenticate('jwt', { session: false }), (req, res) => {
+  const userId = req.body.userId;
+  const postId = req.body.postId;
+  const loggedInUserId = req.user._id;
+  if (userId === undefined || postId === undefined)
+    return res.json({ success: false, msg: 'Please pass correct userId and postId' });
+
+  User.likePost(loggedInUserId, userId, postId, (err, data) => {
+    if (err) res.status(400).json({ success: false, msg: 'There was some error ' + err });
+    res.json({ success: true, msg: 'Successfully liked the post' });
+  });
+});
+
+// This user will now not like post with postId that is it reverts back to nothing
+router.delete('/like/posts', passport.authenticate('jwt', { session: false }), (req, res) => {
+  const userId = req.body.userId;
+  const postId = req.body.postId;
+  const loggedInUserId = req.user._id;
+  if (userId === undefined || postId === undefined)
+    return res.json({ success: false, msg: 'Please pass correct userId and postId' });
+  User.deleteLikePost(loggedInUserId, userId, postId, (err, data) => {
+    if (err) res.status(400).json({ success: false, msg: 'There was some error ' + err });
+    res.json({ success: true, msg: 'Successfully unliked the post' });
+  });
+});
+
 module.exports = router;
