@@ -142,4 +142,43 @@ router.get('/pictures', passport.authenticate('jwt', { session: false }), (req, 
     return res.status(200).send(obj);
   });
 });
+
+// Get list of uses who loggedin user is following
+router.get('/following', passport.authenticate('jwt', { session: false }), (req, res) => {
+  const userId = req.user._id;
+  const limit = req.query.limit ? Number.parseInt(req.query.limit) : 20;
+  const offset = req.query.offset ? Number.parseInt(req.query.offset) : 0;
+
+  User.getFollowing(userId, limit, offset, (err, data) => {
+    if (err) return res.status(404).send({ success: false, msg: 'Failed to find user with id: ' + id });
+    let obj = JSON.parse(JSON.stringify(data));
+    obj.count = data.following.length;
+    return res.status(200).send(obj);
+  });
+});
+
+// Return list of users who follow loggedin user
+router.get('/followers', passport.authenticate('jwt', { session: false }), (req, res) => {
+  const userId = req.user._id;
+  const limit = req.query.limit ? Number.parseInt(req.query.limit) : 20;
+  const offset = req.query.offset ? Number.parseInt(req.query.offset) : 0;
+
+  User.getFollowers(userId, limit, offset, (err, data) => {
+    if (err) return res.status(404).send({ success: false, msg: 'Failed to find user with id: ' + id });
+    const obj = JSON.parse(JSON.stringify(data));
+    obj.count = data.followers.length;
+    return res.status(200).send(obj);
+  });
+});
+
+// THis user will follow user with id targetUserId
+router.put('/following/:targetUserId', passport.authenticate('jwt', { session: false }), (req, res) => {
+  const userId = req.user._id;
+  const targetUserId = req.params.targetUserId;
+
+  User.follow(userId, targetUserId, (err, data) => {
+    if (err) return res.status(400).json({ success: false, msg: 'Unable to follow  user with id ' + targetUserId });
+    return res.json({ success: true, msg: 'Successfully followed user with id ' + targetUserId });
+  });
+});
 module.exports = router;

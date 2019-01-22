@@ -30,7 +30,7 @@ router.get('/:id', (req, res, next) => {
   });
 });
 
-// Return list of users who you follow
+// Return list of users who follow you
 router.get('/:id/followers', (req, res, next) => {
   const id = req.params.id;
   const limit = req.query.limit ? Number.parseInt(req.query.limit) : 20;
