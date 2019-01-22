@@ -43,7 +43,8 @@ const UserSchema = mongoose.Schema({
   following: [ObjectId],
   pictures: [String],
   posts: [PostSchema],
-  likedPosts: [{ _id: false, userId: ObjectId, postId: ObjectId }]
+  likedPosts: [{ _id: false, userId: ObjectId, postId: ObjectId }],
+  disLikedPosts: [{ _id: false, userId: ObjectId, postId: ObjectId }]
 });
 
 const User = mongoose.model('User', UserSchema);
@@ -83,22 +84,57 @@ module.exports.likePost = (loggedInUserId, targetUserId, postId, callback) => {
     if (err) {
       callback(err, data);
     }
-    User.findOneAndUpdate(
-      { _id: loggedInUserId },
-      {
-        $addToSet: {
-          likedPosts: { userId: targetUserId, postId }
-        }
-      },
-      { new: true },
-      callback
-    );
+    deleteDislikePost(loggedInUserId, targetUserId, postId, (err, data) => {
+      if (err) callback(err, data);
+      User.findOneAndUpdate(
+        { _id: loggedInUserId },
+        {
+          $addToSet: {
+            likedPosts: { userId: targetUserId, postId }
+          }
+        },
+        { new: true },
+        callback
+      );
+    });
   });
 };
 
-module.exports.deleteLikePost = (loggedInUserId, targetUserId, postId, callback) => {
+module.exports.dislikePost = (loggedInUserId, targetUserId, postId, callback) => {
+  User.find({ _id: targetUserId, posts: { $elemMatch: { _id: postId } } }, (err, data) => {
+    if (err) {
+      callback(err, data);
+    }
+    deleteLikePost(loggedInUserId, targetUserId, postId, (err, data) => {
+      if (err) callback(err, data);
+      User.findOneAndUpdate(
+        { _id: loggedInUserId },
+        {
+          $addToSet: {
+            disLikedPosts: { userId: targetUserId, postId }
+          }
+        },
+        { new: true },
+        callback
+      );
+    });
+  });
+};
+
+const deleteDislikePost = (loggedInUserId, targetUserId, postId, callback) => {
+  User.findOneAndUpdate(
+    { _id: loggedInUserId },
+    { $pull: { disLikedPosts: { userId: targetUserId, postId } } },
+    callback
+  );
+};
+
+const deleteLikePost = (loggedInUserId, targetUserId, postId, callback) => {
   User.findOneAndUpdate({ _id: loggedInUserId }, { $pull: { likedPosts: { userId: targetUserId, postId } } }, callback);
 };
+
+module.exports.deleteLikePost = deleteLikePost;
+module.exports.deleteDislikePost = deleteDislikePost;
 
 module.exports.getUserByUsername = (username, callback) => {
   const query = {

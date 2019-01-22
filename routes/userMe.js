@@ -74,4 +74,31 @@ router.delete('/like/posts', passport.authenticate('jwt', { session: false }), (
   });
 });
 
+// This user will now dislike post with postId
+router.put('/dislike/posts', passport.authenticate('jwt', { session: false }), (req, res) => {
+  const userId = req.body.userId;
+  const postId = req.body.postId;
+  const loggedInUserId = req.user._id;
+  if (userId === undefined || postId === undefined)
+    return res.json({ success: false, msg: 'Please pass correct userId and postId' });
+
+  User.dislikePost(loggedInUserId, userId, postId, (err, data) => {
+    if (err) res.status(400).json({ success: false, msg: 'There was some error ' + err });
+    res.json({ success: true, msg: 'Successfully disliked the post' });
+  });
+});
+
+// This user will now not dislike post with postId that is it reverts back to nothing
+router.delete('/dislike/posts', passport.authenticate('jwt', { session: false }), (req, res) => {
+  const userId = req.body.userId;
+  const postId = req.body.postId;
+  const loggedInUserId = req.user._id;
+  if (userId === undefined || postId === undefined)
+    return res.json({ success: false, msg: 'Please pass correct userId and postId' });
+  User.deleteDislikePost(loggedInUserId, userId, postId, (err, data) => {
+    if (err) res.status(400).json({ success: false, msg: 'There was some error ' + err });
+    res.json({ success: true, msg: 'Successfully un-disliked the post' });
+  });
+});
+
 module.exports = router;
