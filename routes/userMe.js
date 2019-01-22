@@ -181,4 +181,15 @@ router.put('/following/:targetUserId', passport.authenticate('jwt', { session: f
     return res.json({ success: true, msg: 'Successfully followed user with id ' + targetUserId });
   });
 });
+
+// This user will now unfollow user with id targetUserId
+router.delete('/following/:targetUserId', passport.authenticate('jwt', { session: false }), (req, res) => {
+  const userId = req.user._id;
+  const targetUserId = req.params.targetUserId;
+
+  User.unfollow(userId, targetUserId, (err, data) => {
+    if (err) return res.status(400).json({ success: false, msg: 'Unable to unfollow  user with id ' + targetUserId });
+    return res.json({ success: true, msg: 'Successfully unfollowed user with id ' + targetUserId });
+  });
+});
 module.exports = router;

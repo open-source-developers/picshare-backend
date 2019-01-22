@@ -81,10 +81,24 @@ module.exports.getDisLikes = (id, limit = 20, offset = 0, callback) => {
 
 // error check to see first if both users exist
 module.exports.follow = (loggedInUserId, targetUserId, callback) => {
-  User.findOneAndUpdate({ _id: loggedInUserId }, { $addToSet: { following: targetUserId } }, (err, data) => {
+  User.find({ _id: { $in: [loggedInUserId, targetUserId] } }, (err, data) => {
     if (err) callback(err, data);
+    User.findOneAndUpdate({ _id: loggedInUserId }, { $addToSet: { following: targetUserId } }, (err, data) => {
+      if (err) callback(err, data);
 
-    User.findOneAndUpdate({ _id: targetUserId }, { $addToSet: { followers: loggedInUserId } }, callback);
+      User.findOneAndUpdate({ _id: targetUserId }, { $addToSet: { followers: loggedInUserId } }, callback);
+    });
+  });
+};
+
+module.exports.unfollow = (loggedInUserId, targetUserId, callback) => {
+  User.find({ _id: { $in: [loggedInUserId, targetUserId] } }, (err, data) => {
+    if (err) callback(err, data);
+    // prettier-ignore
+    User.findOneAndUpdate({ _id: loggedInUserId }, { $pull: { following: targetUserId } }, {safe:true} ,(err, data) => {
+      if (err) callback(err, data);
+      User.findOneAndUpdate({ _id: targetUserId }, { $pull: { followers: loggedInUserId} }, {safe:true}, callback);
+    });
   });
 };
 
