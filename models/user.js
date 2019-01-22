@@ -72,11 +72,11 @@ module.exports.getPosts = (id, limit = 20, offset = 0, callback) => {
 };
 
 module.exports.getLikes = (id, limit = 20, offset = 0, callback) => {
-  User.findById(id, 'likes', { skip: offset, limit }, callback);
+  User.findById(id, 'likedPosts', { skip: offset, limit }, callback);
 };
 
-module.exports.getDislikes = (id, limit = 20, offset = 0, callback) => {
-  User.findById(id, 'posts.dislikes', { skip: offset, limit }, callback);
+module.exports.getDisLikes = (id, limit = 20, offset = 0, callback) => {
+  User.findById(id, 'disLikedPosts', { skip: offset, limit }, callback);
 };
 
 module.exports.likePost = (loggedInUserId, targetUserId, postId, callback) => {
@@ -84,7 +84,7 @@ module.exports.likePost = (loggedInUserId, targetUserId, postId, callback) => {
     if (err) {
       callback(err, data);
     }
-    deleteDislikePost(loggedInUserId, targetUserId, postId, (err, data) => {
+    deleteDisLikePost(loggedInUserId, targetUserId, postId, (err, data) => {
       if (err) callback(err, data);
       User.findOneAndUpdate(
         { _id: loggedInUserId },
@@ -100,7 +100,7 @@ module.exports.likePost = (loggedInUserId, targetUserId, postId, callback) => {
   });
 };
 
-module.exports.dislikePost = (loggedInUserId, targetUserId, postId, callback) => {
+module.exports.disLikePost = (loggedInUserId, targetUserId, postId, callback) => {
   User.find({ _id: targetUserId, posts: { $elemMatch: { _id: postId } } }, (err, data) => {
     if (err) {
       callback(err, data);
@@ -121,7 +121,7 @@ module.exports.dislikePost = (loggedInUserId, targetUserId, postId, callback) =>
   });
 };
 
-const deleteDislikePost = (loggedInUserId, targetUserId, postId, callback) => {
+const deleteDisLikePost = (loggedInUserId, targetUserId, postId, callback) => {
   User.findOneAndUpdate(
     { _id: loggedInUserId },
     { $pull: { disLikedPosts: { userId: targetUserId, postId } } },
@@ -134,7 +134,7 @@ const deleteLikePost = (loggedInUserId, targetUserId, postId, callback) => {
 };
 
 module.exports.deleteLikePost = deleteLikePost;
-module.exports.deleteDislikePost = deleteDislikePost;
+module.exports.deleteDisLikePost = deleteDisLikePost;
 
 module.exports.getUserByUsername = (username, callback) => {
   const query = {

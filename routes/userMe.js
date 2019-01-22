@@ -82,7 +82,7 @@ router.put('/dislike/posts', passport.authenticate('jwt', { session: false }), (
   if (userId === undefined || postId === undefined)
     return res.json({ success: false, msg: 'Please pass correct userId and postId' });
 
-  User.dislikePost(loggedInUserId, userId, postId, (err, data) => {
+  User.disLikePost(loggedInUserId, userId, postId, (err, data) => {
     if (err) res.status(400).json({ success: false, msg: 'There was some error ' + err });
     res.json({ success: true, msg: 'Successfully disliked the post' });
   });
@@ -95,10 +95,37 @@ router.delete('/dislike/posts', passport.authenticate('jwt', { session: false })
   const loggedInUserId = req.user._id;
   if (userId === undefined || postId === undefined)
     return res.json({ success: false, msg: 'Please pass correct userId and postId' });
-  User.deleteDislikePost(loggedInUserId, userId, postId, (err, data) => {
+  User.deleteDisLikePost(loggedInUserId, userId, postId, (err, data) => {
     if (err) res.status(400).json({ success: false, msg: 'There was some error ' + err });
     res.json({ success: true, msg: 'Successfully un-disliked the post' });
   });
 });
 
+// Get all likedPosts for loggedin user
+router.get('/likes', passport.authenticate('jwt', { session: false }), (req, res) => {
+  const userId = req.user._id;
+  const limit = req.query.limit ? Number.parseInt(req.query.limit) : 20;
+  const offset = req.query.offset ? Number.parseInt(req.query.offset) : 0;
+
+  User.getLikes(userId, limit, offset, (err, data) => {
+    if (err) return res.status(404).send({ success: false, msg: 'Failed to find user with id: ' + id });
+    let obj = JSON.parse(JSON.stringify(data));
+    obj.count = data.likedPosts.length;
+    return res.status(200).send(obj);
+  });
+});
+
+// Get all disLikedPosts for loggedin user
+router.get('/dislikes', passport.authenticate('jwt', { session: false }), (req, res) => {
+  const userId = req.user._id;
+  const limit = req.query.limit ? Number.parseInt(req.query.limit) : 20;
+  const offset = req.query.offset ? Number.parseInt(req.query.offset) : 0;
+
+  User.getDisLikes(userId, limit, offset, (err, data) => {
+    if (err) return res.status(404).send({ success: false, msg: 'Failed to find user with id: ' + id });
+    let obj = JSON.parse(JSON.stringify(data));
+    obj.count = data.disLikedPosts.length;
+    return res.status(200).send(obj);
+  });
+});
 module.exports = router;
