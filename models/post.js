@@ -5,14 +5,23 @@ const ObjectId = mongoose.Schema.Types.ObjectId;
 // Post Schema
 const PostSchema = mongoose.Schema({
   description: String,
-  likes_count: Number,
-  dislikes_count: Number,
+  picture_url: String,
   likes: [],
   dislikes: [],
-  comments_count: Number,
   comments: [],
-  posted_at: Number,
-  picture_url: String
+  likes_count: {
+    type: Number,
+    default: 0
+  },
+  dislikes_count: {
+    type: Number,
+    default: 0
+  },
+  comments_count: {
+    type: Number,
+    default: 0
+  },
+  posted_at: Number
 });
 
 const Post = mongoose.model('Post', PostSchema);

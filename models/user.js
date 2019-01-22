@@ -66,7 +66,7 @@ module.exports.getPictures = (id, limit = 20, offset = 0, callback) => {
 };
 
 module.exports.getPosts = (id, limit = 20, offset = 0, callback) => {
-  User.findById(id, 'posts', { skip: offset, limit }, callback);
+  User.findById(id, { posts: { $slice: [offset, limit] } }, callback);
 };
 
 module.exports.getLikes = (id, limit = 20, offset = 0, callback) => {
@@ -96,6 +96,20 @@ module.exports.addUser = (newUser, callback) => {
 
 module.exports.getAll = (limit = 20, offset = 0, callback) => {
   User.find({}, null, { skip: offset, limit }, callback);
+};
+
+module.exports.addPost = (post, userId, callback) => {
+  post['posted_at'] = Math.round(new Date().getTime());
+  User.findOneAndUpdate(
+    { _id: userId },
+    {
+      $push: {
+        posts: post
+      }
+    },
+    { new: true },
+    callback
+  );
 };
 
 module.exports.comparePassword = (candidatePassword, hash, callback) => {
