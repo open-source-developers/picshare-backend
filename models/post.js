@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
-const bcrypt = require('bcryptjs');
 const ObjectId = mongoose.Schema.Types.ObjectId;
+const Comment = require('../models/post');
+const CommentSchema = Comment.schema;
 
 // Post Schema
 const PostSchema = mongoose.Schema({
@@ -8,7 +9,7 @@ const PostSchema = mongoose.Schema({
   picture_url: String,
   likes: [],
   dislikes: [],
-  comments: [],
+  comments: [Comment],
   likes_count: {
     type: Number,
     default: 0

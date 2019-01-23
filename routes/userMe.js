@@ -16,6 +16,8 @@ router.get('', passport.authenticate('jwt', { session: false }), (req, res) => {
 router.post('/posts', passport.authenticate('jwt', { session: false }), (req, res) => {
   const userId = req.user._id;
   const { description, picture_url } = req.body;
+  if (description === undefined || picture_url === undefined)
+    return res.json({ success: false, msg: 'Please pass correct userId and postId' });
   const post = { description, picture_url };
   User.addPost(post, userId, (err, data) => {
     if (err) return res.status(400).json({ success: false, msg: 'There was some error : ' + err });
@@ -171,7 +173,7 @@ router.get('/followers', passport.authenticate('jwt', { session: false }), (req,
   });
 });
 
-// THis user will follow user with id targetUserId
+// This user will follow user with id targetUserId
 router.put('/following/:targetUserId', passport.authenticate('jwt', { session: false }), (req, res) => {
   const userId = req.user._id;
   const targetUserId = req.params.targetUserId;
@@ -190,6 +192,22 @@ router.delete('/following/:targetUserId', passport.authenticate('jwt', { session
   User.unfollow(userId, targetUserId, (err, data) => {
     if (err) return res.status(400).json({ success: false, msg: 'Unable to unfollow  user with id ' + targetUserId });
     return res.json({ success: true, msg: 'Successfully unfollowed user with id ' + targetUserId });
+  });
+});
+
+// This user will create a comment on userId' postId'
+router.post('/comment', passport.authenticate('jwt', { session: false }), (req, res) => {
+  const userId = req.user._id;
+  const { userId: targetUserId, postId, content } = req.body;
+  const comment = { content };
+
+  if (postId === undefined || targetUserId === undefined)
+    return res.json({ success: false, msg: 'Please pass correct userId and postId' });
+
+  User.comment(userId, targetUserId, postId, comment, (err, data) => {
+    if (err) console.log(err);
+    console.log(data);
+    res.end();
   });
 });
 module.exports = router;

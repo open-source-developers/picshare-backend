@@ -79,7 +79,22 @@ module.exports.getDisLikes = (id, limit = 20, offset = 0, callback) => {
   User.findById(id, 'disLikedPosts', { skip: offset, limit }, callback);
 };
 
-// error check to see first if both users exist
+module.exports.comment = (loggedInUserId, targetUserId, postId, comment, callback) => {
+  User.find({ _id: { $in: [loggedInUserId, targetUserId] } }, (err, data) => {
+    if (err) callback(err, data);
+    User.find({ _id: targetUserId, posts: { $elemMatch: { _id: postId } } }, (err, data) => {
+      if (err) callback(err, data);
+      // work from here\
+      User.findOneAndUpdate(
+        { _id: targetUserId, 'posts._id': postId },
+        { $push: { 'posts.$.comments': comment } },
+        { 'posts.$': 1, upsert: true },
+        callback
+      );
+    });
+  });
+};
+
 module.exports.follow = (loggedInUserId, targetUserId, callback) => {
   User.find({ _id: { $in: [loggedInUserId, targetUserId] } }, (err, data) => {
     if (err) callback(err, data);
