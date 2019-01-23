@@ -9,7 +9,7 @@ const _ = require('lodash');
 // Return entire info about this user
 router.get('', passport.authenticate('jwt', { session: false }), (req, res) => {
   const a = _.omit(JSON.parse(JSON.stringify(req.user)), ['password', '__v']);
-  res.end();
+  res.json({ success: true, data: a });
 });
 
 // Current logged in user will now create new post
@@ -226,3 +226,5 @@ router.delete('/comment', passport.authenticate('jwt', { session: false }), (req
   });
 });
 module.exports = router;
+
+// need to recheck like/dislike follow/unfollow logic since it modifies multiple docs
