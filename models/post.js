@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const ObjectId = mongoose.Schema.Types.ObjectId;
-const Comment = require('../models/post');
+const Comment = require('../models/comment');
 const CommentSchema = Comment.schema;
 
 // Post Schema
@@ -9,7 +9,7 @@ const PostSchema = mongoose.Schema({
   picture_url: String,
   likes: [],
   dislikes: [],
-  comments: [Comment],
+  comments: [CommentSchema],
   likes_count: {
     type: Number,
     default: 0

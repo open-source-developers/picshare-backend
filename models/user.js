@@ -3,6 +3,7 @@ const bcrypt = require('bcryptjs');
 const ObjectId = mongoose.Schema.Types.ObjectId;
 const Post = require('../models/post');
 const PostSchema = Post.schema;
+const Comment = require('../models/comment');
 
 // User Schema
 const UserSchema = mongoose.Schema({
@@ -79,12 +80,29 @@ module.exports.getDisLikes = (id, limit = 20, offset = 0, callback) => {
   User.findById(id, 'disLikedPosts', { skip: offset, limit }, callback);
 };
 
+module.exports.deleteComment = (loggedInUserId, targetUserId, postId, callback) => {
+  User.find({ _id: { $in: [loggedInUserId, targetUserId] } }, (err, data) => {
+    if (err) callback(err, data);
+    User.find({ _id: targetUserId, posts: { $elemMatch: { _id: postId } } }, (err, data) => {
+      if (err) callback(err, data);
+      User.findOneAndUpdate(
+        { _id: targetUserId, 'posts._id': postId, 'posts.comments.userId': loggedInUserId },
+        { $pull: { 'posts.$.comments.$.userId': loggedInUserId } },
+        { 'posts.$': 1, upsert: true },
+        callback
+      );
+    });
+  });
+};
+
 module.exports.comment = (loggedInUserId, targetUserId, postId, comment, callback) => {
   User.find({ _id: { $in: [loggedInUserId, targetUserId] } }, (err, data) => {
     if (err) callback(err, data);
     User.find({ _id: targetUserId, posts: { $elemMatch: { _id: postId } } }, (err, data) => {
       if (err) callback(err, data);
-      // work from here\
+
+      let newComment = new Comment();
+      console.log(newComment);
       User.findOneAndUpdate(
         { _id: targetUserId, 'posts._id': postId },
         { $push: { 'posts.$.comments': comment } },

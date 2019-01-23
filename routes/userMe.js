@@ -199,13 +199,27 @@ router.delete('/following/:targetUserId', passport.authenticate('jwt', { session
 router.post('/comment', passport.authenticate('jwt', { session: false }), (req, res) => {
   const userId = req.user._id;
   const { userId: targetUserId, postId, content } = req.body;
-  const comment = { content };
+  const comment = { content, userId: targetUserId };
 
   if (postId === undefined || targetUserId === undefined)
     return res.json({ success: false, msg: 'Please pass correct userId and postId' });
 
   User.comment(userId, targetUserId, postId, comment, (err, data) => {
-    if (err) console.log(err);
+    if (err) return res.status(400).json({ success: false, msg: 'Unable to comment' });
+    return res.json({ success: true, msg: 'Successfully commented' + targetUserId });
+  });
+});
+
+// This user will now delete their comment on userId' postId
+router.delete('/comment', passport.authenticate('jwt', { session: false }), (req, res) => {
+  const userId = req.user._id;
+  const { userId: targetUserId, postId } = req.body;
+
+  if (postId === undefined || targetUserId === undefined)
+    return res.json({ success: false, msg: 'Please pass correct userId and postId' });
+
+  User.deleteComment(userId, targetUserId, postId, (err, data) => {
+    if (err) console.log('err');
     console.log(data);
     res.end();
   });
