@@ -205,23 +205,24 @@ router.post('/comment', passport.authenticate('jwt', { session: false }), (req, 
     return res.json({ success: false, msg: 'Please pass correct userId and postId' });
 
   User.comment(userId, targetUserId, postId, comment, (err, data) => {
-    if (err) return res.status(400).json({ success: false, msg: 'Unable to comment' });
-    return res.json({ success: true, msg: 'Successfully commented' + targetUserId });
+    if (err) return res.status(400).json({ success: false, msg: 'Unable to comment', err });
+    let obj = JSON.parse(JSON.stringify(data.posts));
+    obj = obj[0].comments[0];
+    return res.json({ success: true, msg: 'Successfully commented', data: obj });
   });
 });
 
 // This user will now delete their comment on userId' postId
 router.delete('/comment', passport.authenticate('jwt', { session: false }), (req, res) => {
   const userId = req.user._id;
-  const { userId: targetUserId, postId } = req.body;
+  const { userId: targetUserId, postId, commentId } = req.body;
 
-  if (postId === undefined || targetUserId === undefined)
-    return res.json({ success: false, msg: 'Please pass correct userId and postId' });
+  if (postId === undefined || targetUserId === undefined || commentId === undefined)
+    return res.json({ success: false, msg: 'Please pass correct userId, postId and commentId' });
 
-  User.deleteComment(userId, targetUserId, postId, (err, data) => {
-    if (err) console.log('err');
-    console.log(data);
-    res.end();
+  User.deleteComment(userId, targetUserId, postId, commentId, (err, data) => {
+    if (err) res.status(400).json({ success: false, msg: 'Unable to delete comment', err });
+    return res.json({ success: true, msg: 'Successfully deleted comment' });
   });
 });
 module.exports = router;
